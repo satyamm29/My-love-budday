@@ -104,15 +104,21 @@
 	</head>
 	<body>
 		<div class="card" role="main">
-			<div class="heart" aria-hidden="true"></div>
+			<div class="heart" aria-hidden="true">
+				<!-- inline SVG heart for consistent blurred background -->
+				<svg viewBox="0 0 32 29.6" width="240" height="240" aria-hidden="true" focusable="false">
+					<path d="M23.6 0c-2.9 0-4.7 1.9-7.6 1.9S11.3 0 8.4 0C3.8 0 0 3.8 0 8.4c0 5.2 5.6 9.2 14.1 16.7L16 26l1.9-0.9C26.4 17.6 32 13.6 32 8.4 32 3.8 28.2 0 23.6 0z" fill="#ffb3e6" />
+				</svg>
+			</div>
 			<header>
 				<div class="badge">❤️</div>
 				<div>
 					<h1>Happy Birthday, My Love!</h1>
 					<p class="lead">Wishing you a day full of love, laughter, and purple dreams.</p>
 					<div class="actions">
-						<button class="btn" id="surpriseBtn">Open Surprise</button>
-						<button class="btn ghost" id="musicBtn">Play Music</button>
+							<button class="btn" id="surpriseBtn">Open Surprise</button>
+							<button class="btn ghost" id="musicBtn">Play Music</button>
+							<button class="btn" id="addWishBtn">Add Wish</button>
 					</div>
 				</div>
 			</header>
@@ -122,28 +128,123 @@
 			</div>
 
 			<div class="hearts-small" id="hearts"></div>
+			<div class="wishes" id="wishes"></div>
+			<div class="couple" aria-hidden="true">
+				<!-- simple animated SVG couple illustration (replace with AI image if desired) -->
+				<svg width="220" height="120" viewBox="0 0 220 120" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:1rem auto 0;">
+					<g transform="translate(20,10)">
+						<!-- left person -->
+						<g class="person left">
+							<circle cx="30" cy="30" r="16" fill="#ffd1e6" />
+							<rect x="18" y="46" width="24" height="36" rx="12" fill="#cfa0e6" />
+						</g>
+						<!-- right person -->
+						<g class="person right">
+							<circle cx="110" cy="30" r="16" fill="#ffd1e6" />
+							<rect x="98" y="46" width="24" height="36" rx="12" fill="#b38fe6" />
+						</g>
+						<!-- small heart between -->
+						<g transform="translate(64,24)">
+							<path d="M8 0C4.5 0 2 2.5 2 6c0 5.5 6 9 6 9s6-3.5 6-9c0-3.5-2.5-6-6-6z" fill="#ff8ed6">
+								<animate attributeName="opacity" values="0.6;1;0.6" dur="2.4s" repeatCount="indefinite" />
+							</path>
+						</g>
+					</g>
+					<style>
+						.person{transform-origin:50% 50%}
+						.person.left{animation:floaty 4s ease-in-out infinite}
+						.person.right{animation:floaty 4s ease-in-out infinite;animation-delay:.5s}
+						@keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+					</style>
+				</svg>
+			</div>
+
+			<!-- modal for adding a custom wish -->
+			<div id="wishModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+				<div style="background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));padding:1rem 1.25rem;border-radius:12px;max-width:420px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+					<h3 style="margin:0 0 .5rem 0;color:var(--accent)">Write a wish</h3>
+					<textarea id="wishText" rows="3" style="width:100%;border-radius:8px;padding:.5rem;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--white)"></textarea>
+					<div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+						<button id="cancelWish" class="btn ghost">Cancel</button>
+						<button id="sendWish" class="btn">Send</button>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<script>
 			// create floating hearts
 			const hearts = document.getElementById('hearts');
+			let heartCount = 0;
+			const maxHearts = 26;
 			function spawnHeart(){
+				if(heartCount > maxHearts) return;
 				const el = document.createElement('i');
 				const size = Math.random()*18 + 8;
 				el.style.width = size + 'px';
 				el.style.height = size + 'px';
-				el.style.left = (Math.random()*100) + '%';
+				el.style.left = (Math.random()*95) + '%';
 				el.style.bottom = '-20px';
-				el.style.background = `linear-gradient(45deg, rgba(255,142,214,0.9), rgba(200,140,255,0.9))`;
-				el.style.opacity = 0.9;
-				el.style.animationDuration = (4 + Math.random()*5) + 's';
+				el.style.background = `linear-gradient(45deg, rgba(255,142,214,${0.7+Math.random()*0.3}), rgba(200,140,255,${0.7+Math.random()*0.3}))`;
+				el.style.opacity = (0.6 + Math.random()*0.4).toFixed(2);
+				const dur = (4 + Math.random()*6);
+				el.style.animationDuration = dur + 's';
 				el.style.animationDelay = (Math.random()*2) + 's';
 				el.style.transform = 'rotate(-45deg)';
 				hearts.appendChild(el);
-				setTimeout(()=> el.remove(), 11000);
+				heartCount++;
+				setTimeout(()=>{ el.remove(); heartCount--; }, (dur+1)*1000);
 			}
-			for(let i=0;i<10;i++) spawnHeart();
-			setInterval(spawnHeart, 800);
+			for(let i=0;i<8;i++) spawnHeart();
+			setInterval(spawnHeart, 700);
+
+			// floating wishes
+			const wishesEl = document.getElementById('wishes');
+			const wishesList = [
+				"You make my heart skip a beat.",
+				"Every moment with you is my favorite.",
+				"I love you more each and every day.",
+				"You're my today and all of my tomorrows.",
+				"To the moon and back, always.",
+				"Your smile lights up my world.",
+				"Forever us, forever love.",
+				"You're my favorite hello and hardest goodbye.",
+				"You are my sweet forever.",
+				"Every love story is beautiful, but ours is my favorite."
+			];
+
+			function spawnWish(text){
+				const el = document.createElement('div');
+				el.className = 'wish';
+				el.textContent = text;
+				const left = Math.random()*80 + 5; // 5% to 85%
+				el.style.left = left + '%';
+				const dur = 6 + Math.random()*6; // 6-12s
+				el.style.animation = `floatWish ${dur}s linear forwards`;
+				wishesEl.appendChild(el);
+				setTimeout(()=> el.remove(), (dur+0.6)*1000);
+			}
+
+			// periodically float random wishes
+			setInterval(()=>{
+				const t = wishesList[Math.floor(Math.random()*wishesList.length)];
+				spawnWish(t);
+			}, 2200);
+
+			// Add Wish modal behavior
+			const addWishBtn = document.getElementById('addWishBtn');
+			const wishModal = document.getElementById('wishModal');
+			const cancelWish = document.getElementById('cancelWish');
+			const sendWish = document.getElementById('sendWish');
+			const wishText = document.getElementById('wishText');
+
+			addWishBtn.addEventListener('click', ()=>{ wishModal.style.display = 'flex'; wishText.value=''; wishText.focus(); });
+			cancelWish.addEventListener('click', ()=>{ wishModal.style.display = 'none'; });
+			sendWish.addEventListener('click', ()=>{
+				const v = (wishText.value || '').trim();
+				if(v){ spawnWish(v); wishesList.push(v); }
+				wishModal.style.display = 'none';
+			});
 
 			// surprise button: reveal a larger personalized message
 			document.getElementById('surpriseBtn').addEventListener('click', ()=>{
@@ -154,24 +255,73 @@
 			// audio controls (user must click to allow). To use a local file, place `assets/birthday.mp3` in the repo and replace the src below.
 			const musicBtn = document.getElementById('musicBtn');
 			const bgAudio = document.createElement('audio');
-			bgAudio.id = 'bgAudio';
-			bgAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-			bgAudio.preload = 'none';
-			bgAudio.loop = true;
-			document.body.appendChild(bgAudio);
-			musicBtn.addEventListener('click', async ()=>{
-				try{
-					if (bgAudio.paused) {
-						await bgAudio.play();
-						musicBtn.textContent = 'Pause Music';
-					} else {
-						bgAudio.pause();
+				bgAudio.id = 'bgAudio';
+				bgAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+				bgAudio.preload = 'none';
+				bgAudio.loop = true;
+				document.body.appendChild(bgAudio);
+				musicBtn.addEventListener('click', async ()=>{
+					try{
+						if (bgAudio.paused) {
+							await bgAudio.play();
+							musicBtn.textContent = 'Pause Music';
+						} else {
+							bgAudio.pause();
+							musicBtn.textContent = 'Play Music';
+						}
+					} catch (e) {
 						musicBtn.textContent = 'Play Music';
 					}
-				} catch (e) {
-					musicBtn.textContent = 'Play Music';
+				});
+				function onPlayerReady(event){
+					// Aggressively attempt autoplay + unmute. Browsers may still block autoplay with sound.
+					try { player.playVideo(); } catch (e) {}
+
+					// Try multiple times to unmute & play (some browsers allow if retried after load)
+					let attempts = 0;
+					const maxAttempts = 12; // try ~12 times (~8-12s)
+					const tryInterval = setInterval(()=>{
+						attempts++;
+						try{
+							if(player && player.playVideo){
+								player.playVideo();
+							}
+							if(player && player.unMute){
+								player.unMute();
+								player.setVolume(100);
+							}
+						}catch(e){}
+						const isPlaying = player && player.getPlayerState && player.getPlayerState() === 1;
+						const isMuted = player && player.isMuted && player.isMuted();
+						if(isPlaying && !isMuted) {
+							clearInterval(tryInterval);
+						} else if(attempts >= maxAttempts){
+							clearInterval(tryInterval);
+							// show Enable Sound fallback so visitor can explicitly allow audio
+							const card = document.querySelector('.card');
+							if(card && !document.getElementById('enableSoundBtn')){
+								const enableBtn = document.createElement('button');
+								enableBtn.textContent = 'Enable Sound';
+								enableBtn.id = 'enableSoundBtn';
+								enableBtn.style.position = 'absolute';
+								enableBtn.style.right = '1rem';
+								enableBtn.style.bottom = '1rem';
+								enableBtn.style.padding = '0.4rem 0.6rem';
+								enableBtn.style.borderRadius = '8px';
+								enableBtn.style.border = 'none';
+								enableBtn.style.cursor = 'pointer';
+								enableBtn.style.background = 'rgba(225,190,231,0.95)';
+								enableBtn.style.color = 'var(--purple-1)';
+								enableBtn.style.fontWeight = '700';
+								enableBtn.addEventListener('click', ()=>{
+									try{ player.unMute(); player.setVolume(100); player.playVideo(); } catch(e){}
+									enableBtn.remove();
+								});
+								card.appendChild(enableBtn);
+							}
+						}
+					}, 700);
 				}
-			});
 		</script>
 	</body>
 </html>
