@@ -139,27 +139,93 @@
 				msg.innerHTML = `<h2 style="margin:0 0 .5rem 0;color:var(--accent)">Surprise!</h2><p style="margin:0">I love you more than words — happy birthday. Here’s to our next adventures together. 💜</p>`;
 			});
 
-			// audio controls (user must click to allow). To use a local file, place `assets/birthday.mp3` in the repo and replace the src below.
+			// YouTube player: embed and control the requested song via YouTube IFrame API
+			// Song: https://www.youtube.com/watch?v=eKTGWpezWtQ
 			const musicBtn = document.getElementById('musicBtn');
-			const bgAudio = document.createElement('audio');
-			bgAudio.id = 'bgAudio';
-			bgAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-			bgAudio.preload = 'none';
-			bgAudio.loop = true;
-			document.body.appendChild(bgAudio);
-			musicBtn.addEventListener('click', async ()=>{
-				try{
-					if (bgAudio.paused) {
-						await bgAudio.play();
-						musicBtn.textContent = 'Pause Music';
-					} else {
-						bgAudio.pause();
-						musicBtn.textContent = 'Play Music';
+			// insert iframe (hidden visually but accessible to the API)
+			const ytContainer = document.createElement('div');
+			ytContainer.id = 'yt-player-wrap';
+			ytContainer.style.position = 'absolute';
+			ytContainer.style.left = '-9999px';
+			ytContainer.style.width = '1px';
+			ytContainer.style.height = '1px';
+			document.body.appendChild(ytContainer);
+
+			const tag = document.createElement('script');
+			tag.src = 'https://www.youtube.com/iframe_api';
+			document.head.appendChild(tag);
+
+			let player;
+			function onYouTubeIframeAPIReady() {
+				player = new YT.Player('yt-player-wrap', {
+					height: '1',
+					width: '1',
+					videoId: 'eKTGWpezWtQ',
+					playerVars: { 'autoplay': 1, 'controls': 0, 'rel': 0, 'playsinline': 1, 'modestbranding': 1 },
+					events: {
+						'onReady': onPlayerReady,
+						'onStateChange': onPlayerStateChange
 					}
-				} catch (e) {
-					musicBtn.textContent = 'Play Music';
+				});
+			}
+
+			function onPlayerReady(event){
+				// Try to autoplay (many browsers allow muted autoplay). Start playback and attempt to unmute.
+				try {
+					player.playVideo();
+				} catch (e) {}
+				// attempt to unmute after a short delay (may be blocked by browser)
+				setTimeout(()=>{
+					try { player.unMute(); player.setVolume(100); } catch(e){}
+				}, 700);
+
+				// After a moment, if autoplay with sound is blocked, show a small "Enable sound" button so user can allow audio.
+				setTimeout(()=>{
+					const isPlaying = player && player.getPlayerState && player.getPlayerState() === 1;
+					const isMuted = player && player.isMuted && player.isMuted();
+					if(!isPlaying || isMuted){
+						const card = document.querySelector('.card');
+						const enableBtn = document.createElement('button');
+						enableBtn.textContent = 'Enable Sound';
+						enableBtn.id = 'enableSoundBtn';
+						enableBtn.style.position = 'absolute';
+						enableBtn.style.right = '1rem';
+						enableBtn.style.bottom = '1rem';
+						enableBtn.style.padding = '0.4rem 0.6rem';
+						enableBtn.style.borderRadius = '8px';
+						enableBtn.style.border = 'none';
+						enableBtn.style.cursor = 'pointer';
+						enableBtn.style.background = 'rgba(225,190,231,0.95)';
+						enableBtn.style.color = 'var(--purple-1)';
+						enableBtn.style.fontWeight = '700';
+						enableBtn.addEventListener('click', ()=>{
+							try{ player.unMute(); player.setVolume(100); player.playVideo(); } catch(e){}
+							enableBtn.remove();
+						});
+						card.appendChild(enableBtn);
+					}
+				}, 1200);
+			}
+
+			function onPlayerStateChange(e){
+				if(!player) return;
+				const state = player.getPlayerState();
+				if(state === 1) musicBtn.textContent = 'Pause Music';
+				else musicBtn.textContent = 'Play Music';
+			}
+
+			musicBtn.addEventListener('click', async ()=>{
+				if(!player) return;
+				const state = player.getPlayerState();
+				if(state === 1){
+					player.pauseVideo();
+				} else {
+					player.playVideo();
 				}
 			});
+
+			// expose API callback globally (required by YT API)
+			window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 		</script>
 	</body>
 </html>
