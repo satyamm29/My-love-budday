@@ -139,15 +139,26 @@
 				msg.innerHTML = `<h2 style="margin:0 0 .5rem 0;color:var(--accent)">Surprise!</h2><p style="margin:0">I love you more than words — happy birthday. Here’s to our next adventures together. 💜</p>`;
 			});
 
-			// optional small audio (user must click to allow)
+			// audio controls (user must click to allow). To use a local file, place `assets/birthday.mp3` in the repo and replace the src below.
 			const musicBtn = document.getElementById('musicBtn');
-			let audio;
+			const bgAudio = document.createElement('audio');
+			bgAudio.id = 'bgAudio';
+			bgAudio.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+			bgAudio.preload = 'none';
+			bgAudio.loop = true;
+			document.body.appendChild(bgAudio);
 			musicBtn.addEventListener('click', async ()=>{
-				if(!audio){
-					audio = new Audio('https://cdn.simple-music.example/sample.mp3');
+				try{
+					if (bgAudio.paused) {
+						await bgAudio.play();
+						musicBtn.textContent = 'Pause Music';
+					} else {
+						bgAudio.pause();
+						musicBtn.textContent = 'Play Music';
+					}
+				} catch (e) {
+					musicBtn.textContent = 'Play Music';
 				}
-				try{ await audio.play(); musicBtn.textContent = 'Pause Music'; }
-				catch(e){ musicBtn.textContent = 'Play (allow autoplay)'; }
 			});
 		</script>
 	</body>
