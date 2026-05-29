@@ -2945,7 +2945,7 @@
 				question: "What are our favourite desserts? 🍮",
 				options: [
 					"Dahi 🥛",
-					"Rasgulla & Motichur ki Laddoo 🍬",
+					"Gajar Halwa & Motichur ka Laddoo 🍬",
 					"Ice Cream 🍦",
 					"Gulab Jamun 🍩"
 				],
@@ -3017,31 +3017,18 @@
 			// Disable all buttons to prevent double-clicks
 			buttons.forEach(b => b.disabled = true);
 
-			if (selectedIdx === correctIdx) {
-				buttonEl.classList.add('correct');
-				quizFeedbackEl.className = 'quiz-feedback correct-text';
-				quizFeedbackEl.textContent = "Perfect! That's absolutely right! 💯✨";
+			// Always correct as requested!
+			buttonEl.classList.add('correct');
+			quizFeedbackEl.className = 'quiz-feedback correct-text';
+			quizFeedbackEl.textContent = "Perfect! That's absolutely right! 💯✨";
 
-				triggerLocalConfetti(buttonEl, ['#ff4081', '#ffd700', '#d500f9']);
+			triggerLocalConfetti(buttonEl, ['#ff4081', '#ffd700', '#d500f9']);
 
-				// Move to next question after delay
-				setTimeout(() => {
-					currentQuizIndex++;
-					loadQuizQuestion(currentQuizIndex);
-				}, 1800);
-			} else {
-				buttonEl.classList.add('wrong');
-				quizFeedbackEl.className = 'quiz-feedback wrong-text';
-				quizFeedbackEl.textContent = `Oops! Close, but not quite. Hint: "${hint}"`;
-
-				// Re-enable options after short delay to let them try again
-				setTimeout(() => {
-					buttons.forEach(b => {
-						b.disabled = false;
-						b.classList.remove('wrong');
-					});
-				}, 2000);
-			}
+			// Move to next question after delay
+			setTimeout(() => {
+				currentQuizIndex++;
+				loadQuizQuestion(currentQuizIndex);
+			}, 1800);
 		}
 
 		function resetQuiz() {
