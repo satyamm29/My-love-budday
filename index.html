@@ -62,27 +62,39 @@
 			}
 
 			/* floating hearts */
+			/* large blurred heart (uses inline SVG for cross-browser support) */
 			.heart{
-				position:absolute;left:50%;top:20%;transform:translateX(-50%);
-				width:140px;height:140px;opacity:0.08;filter:blur(6px);
-				pointer-events:none;background:radial-gradient(circle at 30% 30%, #ffd1ff, #ff77ff);
-				clip-path: path('M10 30 A 20 20 0 0 1 50 30 L 50 30 A 20 20 0 0 1 90 30 Q 90 60 50 95 Q 10 60 10 30 Z');
+				position:absolute;left:50%;top:12%;transform:translateX(-50%);
+				width:240px;height:240px;opacity:0.08;pointer-events:none;filter:blur(8px);
 			}
 
 			/* small animated hearts */
 			.hearts-small{
-				position:absolute;inset:0;pointer-events:none;overflow:hidden
+				position:absolute;inset:0;pointer-events:none;overflow:hidden;
 			}
+			/* CSS heart using pseudo elements on each <i> */
 			.hearts-small i{
-				position:absolute;width:14px;height:14px;
-				background:linear-gradient(45deg,#ff8ed6,#c88cff);
-				transform:rotate(-45deg);border-radius:3px;opacity:0.9
+				position:absolute;width:16px;height:16px;transform:rotate(-45deg);
+				background:linear-gradient(45deg,#ff8ed6,#c88cff);opacity:0.95;
+				display:block;
 			}
-			.hearts-small i:after{content:'';position:absolute;left:0;top:0;width:100%;height:100%;border-radius:3px}
+			.hearts-small i:before,
+			.hearts-small i:after{
+				content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:inherit;top:-8px;left:0;
+			}
+			.hearts-small i:after{left:8px}
 
 			@keyframes floatUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-420px) scale(1.6);opacity:0}}
-
 			.hearts-small i{animation:floatUp 6s linear infinite}
+
+			/* floating wishes */
+			.wishes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+			.wish{
+				position:absolute;left:50%;bottom:6%;transform:translateX(-50%);
+				background:rgba(255,255,255,0.06);color:var(--white);padding:.4rem .6rem;border-radius:999px;font-weight:600;
+				backdrop-filter: blur(4px);font-size:0.95rem;white-space:nowrap;opacity:0;pointer-events:none;
+			}
+			@keyframes floatWish{0%{transform:translateY(0) scale(.98);opacity:0}10%{opacity:1}100%{transform:translateY(-360px) scale(1.04);opacity:0}}
 
 			@media (max-width:600px){
 				h1{font-size:1.6rem}
